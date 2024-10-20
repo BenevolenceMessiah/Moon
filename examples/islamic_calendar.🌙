@@ -1,0 +1,13 @@
+﷽:
+    from datetime import date
+    from ummalqura import HijriCalendar
+
+    def display_islamic_date(gregorian_date):
+        hijri_date = HijriCalendar.from_gregorian(gregorian_date.year, gregorian_date.month, gregorian_date.day)
+        print("📅 Gregorian Date:", gregorian_date.strftime("%Y-%m-%d"))
+        print("🕌 Islamic Date:", hijri_date.format("{dd} {MMMM} {yyyy} AH"))
+        print("🕋 التاريخ الهجري:", hijri_date.format_ar("{dd_ar} {MMMM_ar} {yyyy_ar} هـ"))
+
+    if __name__ == "__main__":
+        today = date.today()
+        display_islamic_date(today)

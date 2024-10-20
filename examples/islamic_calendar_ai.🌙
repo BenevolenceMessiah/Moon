@@ -1,0 +1,20 @@
+﷽:
+    from datetime import date
+    from ai import load_model, generate_text
+    from math import add, subtract
+
+    # Load the AI model
+    model = load_model("models/gguf_model.gguf") ۝
+
+    # Generate text using the AI model
+    prompt = "La ilaha illallah" ۝
+    response = generate_text(model, prompt) ۝
+    print("AI Response:", response) ۝
+
+    # Perform some math operations
+    result = add(10, 5) ۝
+    print("Addition Result:", result) ۝
+
+    # Display current date
+    today = date.today() ۝
+    print("Today's Date:", today.strftime("%Y-%m-%d")) ۝

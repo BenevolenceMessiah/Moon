@@ -1,0 +1,12 @@
+﷽:
+    from ai import load_model, generate
+
+    # Load the GGUF model
+    model = load_model("models/gguf_model.gguf") ۝
+
+    # Generate text using the model
+    prompt = "In the beginning, Allah created the heavens and the earth." ۝
+    response = generate(model, prompt) ۝
+
+    # Print the generated text
+    print(response) ۝

@@ -1,0 +1,8 @@
+﷽:  # Entry point (Alternative: def main():)
+    print("ٱلسَّلَامُ عَلَيْكُمْ")  # Outputs "Peace be upon you"
+    print("Hello, World! ☪")
+
+# Alternative entry point using English
+def main():
+    print("Assalamu Alaikum")
+    print("Hello, World! @decorator")
