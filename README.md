@@ -7,10 +7,10 @@
 - [Features](#features)
 - [Special Syntaxes](#special-syntaxes)
 - [Project Structure](#project-structure)
-- [Ins  tallation](#installation)
+- [Installation](#installation)
 - [Usage](#usage)
 - [Standard Library](#standard-library)
-- [AI Integ ration](#ai-integration)
+- [AI Integration](#ai-integration)
 - [Contributing](#contributing)
 - [Donations](#donations)
 - [License](#license)
@@ -34,7 +34,7 @@ Welcome to Moon, the programming language designed to illuminate the path betwee
 
 - Multi-Paradigm Support: Procedural, Object-Oriented, and Functional programming paradigms.
 - Unicode and Cultural Symbols: Incorporate Islamic symbols and phrases directly into your code.
-Seamless Interoperability: Mix and match resources from different programming languages and ecosystems.
+- Seamless Interoperability: Mix and match resources from different programming languages and ecosystems.
 - High-Performance Computing: Optimized for leveraging multi-core processors and hardware accelerators like GPUs and TPUs.
 - Compiled Execution: Translates code into machine-level instructions for faster execution.
 - Strong Typing and Memory Control: Enhanced type system and memory management for performance gains.
@@ -61,7 +61,7 @@ graph TD;
     A10[🕋] --> B10[U+1F54B] --> C10[Kaaba] --> D10[Core library import (import core)] --> E10[import core]
     A11[📿] --> B11[U+1F4FF] --> C11[Prayer Beads] --> D11[Loop iterator (for)] --> E11[for loop]
     A12[🌙] --> B12[U+1F319] --> C12[Crescent Moon] --> D12[Import Moon libraries (import_moon or moon)] --> E12[import moon]
-    ```
+``
 
 ## Example Syntax with English Alternatives
 
