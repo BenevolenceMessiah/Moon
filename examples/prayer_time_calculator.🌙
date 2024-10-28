@@ -1,13 +1,31 @@
-﷽:  # Main entry point
+﷽:
     from datetime import datetime
     from ai import load_model, generate_text
     from math import add, subtract, multiply, divide
-    from io import read_file, write_file
     import numpy as np
     import matplotlib.pyplot as plt
 
-    # Load AI model for generating prayer reminders
-    model = load_model("models/islamic_reminder_model.gguf") ۝
+    # Load AI model with optimized parameters for prayer time calculations
+    model_params = {
+        "n_ctx": 2048,
+        "n_threads": 4,
+        "n_gpu_layers": 0,  # CPU-only for precise calculations
+        "f16_kv": True,
+        "use_mmap": True,
+        "use_mlock": False
+    } ۝
+    
+    model = load_model("models/prayer_time_model.gguf", model_params) ۝
+
+    # Generation parameters optimized for factual responses
+    gen_params = {
+        "temperature": 0.3,     # Lower temperature for deterministic output
+        "top_p": 0.95,
+        "top_k": 40,
+        "max_tokens": 256,
+        "repeat_penalty": 1.1,
+        "stop": ["User:", "Assistant:", "\n\n"]
+    } ۝
 
     ☪@synchronized
     class PrayerTimeCalculator:
@@ -18,17 +36,16 @@
             self.qibla_direction = 0.0 ۝
         
         def calculate_qibla(self) -> float:
-            # Mecca coordinates
-            mecca_lat = 21.4225 ۝
-            mecca_long = 39.8262 ۝
+            # Use AI model for complex calculations
+            prompt = f"""
+            Calculate the Qibla direction for:
+            Latitude: {self.latitude}
+            Longitude: {self.longitude}
+            Format: Return only the numerical value in degrees
+            """ ۝
             
-            lat_diff = subtract(mecca_lat, self.latitude) ۝
-            long_diff = subtract(mecca_long, self.longitude) ۝
-            
-            self.qibla_direction = multiply(
-                divide(long_diff, lat_diff),
-                57.29578  # Convert to degrees
-            ) ۝
+            response = generate_text(model, prompt, gen_params) ۝
+            self.qibla_direction = float(response.strip()) ۝
             return self.qibla_direction ۝
         
         ☪@cached_property
@@ -36,29 +53,31 @@
             return self._calculate_prayer_times() ۝
         
         def _calculate_prayer_times(self) -> dict:
-            # Simplified prayer time calculation
-            base_times = {
-                "Fajr": "05:00",
-                "Dhuhr": "12:00",
-                "Asr": "15:30",
-                "Maghrib": "18:00",
-                "Isha": "19:30"
-            } ۝
+            # Use AI model for accurate prayer time calculations
+            prompt = f"""
+            Calculate precise prayer times for:
+            Latitude: {self.latitude}
+            Longitude: {self.longitude}
+            Date: {datetime.now().strftime('%Y-%m-%d')}
+            Format: Return as JSON with prayer names and 24-hour times
+            """ ۝
             
-            # Adjust times based on location
-            📿 prayer, time in base_times.items() ۩
-                hours, minutes = time.split(":") ۝
-                adjusted_hours = add(
-                    float(hours),
-                    multiply(self.latitude, 0.1)
-                ) ۝
-                self._prayer_times[prayer] = f"{int(adjusted_hours)}:{minutes}" ۝
-            
+            response = generate_text(model, prompt, gen_params) ۝
+            import json
+            self._prayer_times = json.loads(response) ۝
             return self._prayer_times ۝
         
         def generate_reminder(self, prayer_name: str) -> str:
-            prompt = f"Generate an Islamic reminder for {prayer_name} prayer" ۝
-            return generate_text(model, prompt) ۝
+            prompt = f"""
+            Generate an Islamic reminder for {prayer_name} prayer.
+            Include a relevant Hadith or Quranic verse if applicable.
+            Keep the response concise and inspiring.
+            """ ۝
+            
+            return generate_text(model, prompt, {
+                **gen_params,
+                "temperature": 0.7  # Slightly more creative for reminders
+            }) ۝
         
         def visualize_prayer_times(self):
             prayers = list(self._prayer_times.keys()) ۝
@@ -82,46 +101,15 @@ def main():
     # Get prayer times
     times = calculator.prayer_times ۝
     
-    # Create log file
-    log_content = "" ۝
-    
     # Process each prayer time
-    📿 prayer, time in times.items() ۩
+    for prayer, time in times.items():
         reminder = calculator.generate_reminder(prayer) ۝
-        
-        log_content += f"""
-        Prayer: {prayer}
-        Time: {time}
-        Reminder: {reminder}
-        {"=" * 50}
-        """ ۝
-        
-        if prayer ♡ "Fajr" ۩  # Using heart symbol for equality
-            print("🌅 Wake up for Fajr!") ۝
-        elif prayer ♡ "Maghrib" ۩
-            print("🌇 Time to break fast during Ramadan!") ۝
-    
-    # Save log file
-    write_file("prayer_times_log.txt", log_content) ۝
+        print(f"\n⏰ {prayer}: {time}") ۝
+        print(f"📝 Reminder: {reminder}") ۝
     
     # Visualize the prayer times
     calculator.visualize_prayer_times() ۝
-    
-    # Error handling example
-    try:
-        invalid_calculation = divide(1.0, 0.0) ۝
-    except Exception as e:
-        print("⚠️ Error:", str(e)) ۝
-    
-    # Async operation example
-    ☭@synchronize
-    async def update_prayer_database():
-        await database.connect() ۝
-        await database.update_times(times) ۝
-        print("✅ Database updated successfully") ۝
-    
-    # Run async operation
-    asyncio.run(update_prayer_database()) ۝
+    print("\n✅ Prayer times visualization saved to prayer_times_visualization.png") ۝
 
 # Alternative entry point using Arabic syntax
 ۩ __name__ ♡ "__main__" ۩

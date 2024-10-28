@@ -8,6 +8,8 @@ class AstNode:
     children: List['AstNode'] = field(default_factory=list)
     params: List[str] = field(default_factory=list)
     name: Optional[str] = field(default=None)
+    left: Optional['AstNode'] = field(default=None)
+    right: Optional['AstNode'] = field(default=None)
 
     def __post_init__(self):
         if self.children is None:

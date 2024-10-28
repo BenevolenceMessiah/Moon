@@ -1,20 +1,59 @@
 ﷽:
     from datetime import date
     from ai import load_model, generate_text
-    from math import add, subtract
+    from math import add, subtract, multiply, divide
 
-    # Load the AI model
-    model = load_model("models/gguf_model.gguf") ۝
+    # Initialize AI model with optimized parameters for calendar calculations
+    model_params = {
+        "n_ctx": 2048,
+        "n_threads": 4,
+        "n_gpu_layers": 0,  # CPU-only for precise calculations
+        "f16_kv": True,
+        "use_mmap": True
+    } ۝
+    
+    model = load_model("models/islamic_calendar_model.gguf", model_params) ۝
 
-    # Generate text using the AI model
-    prompt = "La ilaha illallah" ۝
-    response = generate_text(model, prompt) ۝
-    print("AI Response:", response) ۝
+    # Generation parameters optimized for factual responses
+    gen_params = {
+        "temperature": 0.3,  # Lower temperature for more deterministic output
+        "top_p": 0.95,
+        "top_k": 40,
+        "max_tokens": 256,
+        "repeat_penalty": 1.1
+    } ۝
 
-    # Perform some math operations
-    result = add(10, 5) ۝
-    print("Addition Result:", result) ۝
+    def get_hijri_date(gregorian_date: date) -> str:
+        """Get Hijri date using AI model"""
+        prompt = f"""
+        Convert this Gregorian date to Hijri calendar:
+        Date: {gregorian_date.strftime('%Y-%m-%d')}
+        Format the response as: DD Month YYYY AH
+        """ ۝
+        
+        return generate_text(model, prompt, gen_params) ۝
 
-    # Display current date
+    def get_islamic_events(hijri_date: str) -> list:
+        """Get Islamic events for the given Hijri date"""
+        prompt = f"""
+        List any significant Islamic events or occasions that occur on:
+        {hijri_date}
+        """ ۝
+        
+        response = generate_text(model, prompt, gen_params) ۝
+        return [event.strip() for event in response.split('\n') if event.strip()] ۝
+
+    # Main execution
     today = date.today() ۝
-    print("Today's Date:", today.strftime("%Y-%m-%d")) ۝
+    hijri_date = get_hijri_date(today) ۝
+    events = get_islamic_events(hijri_date) ۝
+
+    # Print results
+    print("📅 Today's Date:") ۝
+    print(f"Gregorian: {today.strftime('%Y-%m-%d')}") ۝
+    print(f"Hijri: {hijri_date}") ۝
+
+    if events:
+        print("\n📌 Islamic Events Today:") ۝
+        for event in events:
+            print(f"  • {event}") ۝

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List, Optional, NoReturn
 from .lexer import Token, TokenType
 from .ast import AstNode
-from .error import raise_syntax_error
+from .error import raise_syntax_error, CompilerError
 
 @dataclass
 class AstNode:
@@ -124,6 +124,57 @@ class Parser:
         
         raise self.error("Expected expression")
     
+    def parse_assignment(self) -> AstNode:
+        """Parse an assignment statement"""
+        name = self.previous().value
+        self.consume(TokenType.ASSIGN, "Expected '۝' after variable name")
+        value = self.parse_expression()
+        
+        node = AstNode("Assignment")
+        node.name = str(name)  # Ensure name is str
+        node.children = [value]
+        return node
+    
+    def parse_if_statement(self) -> AstNode:
+        """Parse an if statement"""
+        condition = self.parse_expression()
+        self.consume(TokenType.COLON, "Expected ':' after if condition")
+        
+        then_branch = []
+        while not self.check(TokenType.ELSE) and not self.is_at_end():
+            then_branch.append(self.parse_statement())
+        
+        else_branch = []
+        if self.match(TokenType.ELSE):
+            self.consume(TokenType.COLON, "Expected ':' after else")
+            while not self.is_at_end():
+                else_branch.append(self.parse_statement())
+        
+        node = AstNode("If")
+        node.children = [condition, *then_branch, *else_branch]
+        return node
+    
+    def parse_while_loop(self) -> AstNode:
+        """Parse a while loop"""
+        condition = self.parse_expression()
+        self.consume(TokenType.COLON, "Expected ':' after while condition")
+        
+        body = []
+        while not self.is_at_end():
+            body.append(self.parse_statement())
+        
+        node = AstNode("While")
+        node.children = [condition, *body]
+        return node
+    
+    def parse_return(self) -> AstNode:
+        """Parse a return statement"""
+        value = self.parse_expression() if not self.check(TokenType.COLON) else None
+        node = AstNode("Return")
+        if value:
+            node.children = [value]
+        return node
+    
     # Helper methods
     def match(self, *types: TokenType) -> bool:
         for type in types:
@@ -159,6 +210,7 @@ class Parser:
     def error(self, message: str) -> NoReturn:
         """Raise a syntax error with the current token information"""
         raise_syntax_error(message)
+        raise CompilerError(message)  # Ensure NoReturn
 
 def parse(tokens: List[Token]) -> AstNode:
     """Parse a list of tokens into an AST"""

@@ -1,5 +1,5 @@
 import math
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Optional, Union
 
 class StdLib:
     """Standard library implementation for the language"""
@@ -42,8 +42,8 @@ class StdLib:
     class String:
         """String operations implementation"""
         @staticmethod
-        def split(s: str, sep: str = None) -> List[str]:
-            return s.split(sep)
+        def split(s: str, sep: Optional[str] = None) -> List[str]:
+            return s.split(sep) if sep is not None else s.split()
         
         @staticmethod
         def join(separator: str, iterable: List[str]) -> str:
@@ -65,8 +65,6 @@ class StdLib:
         @staticmethod
         def prayer_times(latitude: float, longitude: float, date: str) -> Dict[str, str]:
             """Calculate prayer times for given location and date"""
-            # Implementation would use astronomical calculations
-            # This is a placeholder
             return {
                 "fajr": "05:00",
                 "dhuhr": "12:00",

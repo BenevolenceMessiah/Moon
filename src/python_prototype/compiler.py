@@ -1,69 +1,93 @@
 # compiler.py
 
-from typing import List
+from typing import List, Tuple, Dict, Any, Optional
+from dataclasses import dataclass, field
 from .vm import Instruction, OpCode
 from .parser import parse
-from .lexer import tokenize
+from .lexer import tokenize, Token
+from .ast import AstNode
+from .error import raise_syntax_error
+
+@dataclass
+class CompilerContext:
+    constants: List[Any] = field(default_factory=list)
+    names: List[str] = field(default_factory=list)
+    instructions: List[Instruction] = field(default_factory=list)
+    
+    def add_constant(self, value: Any) -> int:
+        """Add a constant and return its index"""
+        if value in self.constants:
+            return self.constants.index(value)
+        self.constants.append(value)
+        return len(self.constants) - 1
+    
+    def add_name(self, name: str) -> int:
+        """Add a name and return its index"""
+        if name in self.names:
+            return self.names.index(name)
+        self.names.append(name)
+        return len(self.names) - 1
 
 class Compiler:
     def __init__(self):
-        self.bytecode = []
-        self.constants = []
-        self.symbol_table = {}
-
-    def compile(self, node):
-        if node.type == 'PROGRAM':
-            for child in node.children:
-                self.compile(child)
-        elif node.type == 'DEF':
-            self.symbol_table[node.value] = len(self.constants)
-            self.constants.append(('DEF', node.value, node.children))
-        elif node.type == 'BINARY_OP':
-            self.compile(node.children[0])
-            self.compile(node.children[1])
-            self.bytecode.append(('BINARY_OP', node.value))
-        elif node.type == 'IF':
-            self.compile(node.children[0])
-            jump_if_false = len(self.bytecode)
-            self.bytecode.append(('JUMP_IF_FALSE', None))  # Placeholder
-            self.compile(node.children[1])
-            if len(node.children) > 2:
-                jump = len(self.bytecode)
-                self.bytecode.append(('JUMP', None))  # Placeholder
-                self.bytecode[jump_if_false] = ('JUMP_IF_FALSE', len(self.bytecode))
-                self.compile(node.children[2])
-                self.bytecode[jump] = ('JUMP', len(self.bytecode))
-            else:
-                self.bytecode[jump_if_false] = ('JUMP_IF_FALSE', len(self.bytecode))
-        elif node.type == 'PRINT':
-            self.compile(node.children[0])
-            self.bytecode.append(('PRINT',))
-        # Additional compilation rules here...
-        elif node.type == 'HELLO_WORLD':
-            self.compile(node.children[0])
-        else:
-            raise NotImplementedError(f"Compilation for node type '{node.type}' not implemented.")
-
-    def get_bytecode(self):
-        return self.bytecode, self.constants
+        self.context = CompilerContext()
+    
+    def compile(self, node: AstNode) -> None:
+        """Compile an AST node"""
+        method = getattr(self, f'compile_{node.type.lower()}', None)
+        if method is None:
+            raise_syntax_error(f"Cannot compile node type: {node.type}")
+        method(node)
+    
+    def compile_program(self, node: AstNode) -> None:
+        """Compile a program node"""
+        for child in node.children:
+            self.compile(child)
+    
+    def compile_number(self, node: AstNode) -> None:
+        """Compile a number literal"""
+        const_index = self.context.add_constant(float(node.value))
+        self.context.instructions.append(
+            Instruction(OpCode.LOAD_CONST, const_index)
+        )
+    
+    def compile_string(self, node: AstNode) -> None:
+        """Compile a string literal"""
+        const_index = self.context.add_constant(str(node.value))
+        self.context.instructions.append(
+            Instruction(OpCode.LOAD_CONST, const_index)
+        )
+    
+    def compile_binaryop(self, node: AstNode) -> None:
+        """Compile a binary operation"""
+        self.compile(node.children[0])
+        self.compile(node.children[1])
+        
+        op_map = {
+            "+": OpCode.BINARY_ADD,
+            "-": OpCode.BINARY_SUBTRACT,
+            "*": OpCode.BINARY_MULTIPLY,
+            "/": OpCode.BINARY_DIVIDE,
+            "۩": OpCode.BINARY_ADD  # Islamic concatenation uses add
+        }
+        
+        if node.value not in op_map:
+            raise_syntax_error(f"Unknown operator: {node.value}")
+            
+        self.context.instructions.append(
+            Instruction(op_map[node.value])
+        )
+    
+    def get_code(self) -> List[Instruction]:
+        """Get the compiled bytecode"""
+        return self.context.instructions
 
 def compile_code(source: str) -> List[Instruction]:
-    """Compiles source code into VM instructions"""
+    """Compile source code into VM instructions"""
     tokens = tokenize(source)
     ast = parse(tokens)
     
-    instructions = []
+    compiler = Compiler()
+    compiler.compile(ast)
     
-    # Basic compilation logic - will be expanded
-    def compile_node(node):
-        if node.type == "Number":
-            instructions.append(Instruction(OpCode.LOAD_CONST, node.value))
-        elif node.type == "BinaryOp" and node.value == "+":
-            compile_node(node.left)
-            compile_node(node.right)
-            instructions.append(Instruction(OpCode.ADD))
-    
-    compile_node(ast)
-    instructions.append(Instruction(OpCode.RETURN_VALUE))
-    
-    return instructions
+    return compiler.get_code()
