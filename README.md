@@ -61,7 +61,7 @@ graph TD;
     A10[🕋] --> B10[U+1F54B] --> C10[Kaaba] --> D10[Core library import (import core)] --> E10[import core]
     A11[📿] --> B11[U+1F4FF] --> C11[Prayer Beads] --> D11[Loop iterator (for)] --> E11[for loop]
     A12[🌙] --> B12[U+1F319] --> C12[Crescent Moon] --> D12[Import Moon libraries (import_moon or moon)] --> E12[import moon]
-``
+```
 
 ## Example Syntax with English Alternatives
 

@@ -1,5 +1,10 @@
 # compiler.py
 
+from typing import List
+from .vm import Instruction, OpCode
+from .parser import parse
+from .lexer import tokenize
+
 class Compiler:
     def __init__(self):
         self.bytecode = []
@@ -41,3 +46,24 @@ class Compiler:
 
     def get_bytecode(self):
         return self.bytecode, self.constants
+
+def compile_code(source: str) -> List[Instruction]:
+    """Compiles source code into VM instructions"""
+    tokens = tokenize(source)
+    ast = parse(tokens)
+    
+    instructions = []
+    
+    # Basic compilation logic - will be expanded
+    def compile_node(node):
+        if node.type == "Number":
+            instructions.append(Instruction(OpCode.LOAD_CONST, node.value))
+        elif node.type == "BinaryOp" and node.value == "+":
+            compile_node(node.left)
+            compile_node(node.right)
+            instructions.append(Instruction(OpCode.ADD))
+    
+    compile_node(ast)
+    instructions.append(Instruction(OpCode.RETURN_VALUE))
+    
+    return instructions

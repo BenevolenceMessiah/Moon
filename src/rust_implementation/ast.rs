@@ -1,5 +1,24 @@
 // src/ast.rs
 
+use std::collections::HashMap;
+
+#[derive(Debug)]
+pub struct Node {
+    pub ty: String,
+    pub value: Option<String>,
+    pub children: Vec<Node>,
+}
+
+impl Node {
+    pub fn new(ty: String, value: Option<String>, children: Vec<Node>) -> Self {
+        Node { ty, value, children }
+    }
+
+    pub fn is_leaf(&self) -> bool {
+        self.children.is_empty()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum AstNodeType {
     Program,

@@ -1,5 +1,29 @@
 // src/interpreter.rs
 
+use super::ast::*;
+
+fn interpret(node: &Node) {
+    match node.ty.as_str() {
+        "NUM" => print_num(node.value.clone()),
+        "PRINT" => print_value(node.children[0].clone()),
+        _ => println!("Unhandled AST node type: {}", node.ty),
+    }
+}
+
+fn print_num(value: Option<String>) {
+    if let Some(val) = value {
+        let num: i32 = val.parse().unwrap();
+        println!("{}", num);
+    }
+}
+
+fn print_value(node: Node) {
+    match node.ty.as_str() {
+        "NUM" => print_num(node.value),
+        _ => println!("Unhandled value type in PRINT node"),
+    }
+}
+
 use crate::ast::{AstNode, AstNodeType};
 use std::collections::HashMap;
 

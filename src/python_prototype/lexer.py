@@ -1,86 +1,112 @@
 # lexer.py
 
-import re
+from enum import Enum, auto
+from dataclasses import dataclass
+from typing import List, Any
 
-# Define token types and their regex patterns
-TOKENS = [
-    ('NUMBER', r'\d+(\.\d*)?'),  # Integer or decimal number
-    ('IDENTIFIER', r'[a-zA-Z_][a-zA-Z0-9_]*'),  # Identifier
-    ('STRING', r'"([^\\"]|\\.)*"'),  # String enclosed in double quotes
-    ('OPERATOR', r'[+\-*/%!=<>&|^]'),  # Operators
-    ('DELIMITER', r'[;,()\{\}\[\]]'),  # Delimiters
-    ('WHITESPACE', r'\s+'),  # Whitespace
-    ('COMMENT', r'//.*|/\*[\s\S]*?\*/'),  # Comments
-]
+class TokenType(Enum):
+    NUMBER = auto()
+    STRING = auto()
+    IDENTIFIER = auto()
+    ENTRY_POINT = auto()
+    COLON = auto()
+    LEFT_PAREN = auto()
+    RIGHT_PAREN = auto()
+    ASSIGN = auto()
+    CONCAT = auto()
+    SYMBOL = auto()
+    PLUS = auto()
+    MINUS = auto()
+    STAR = auto()
+    SLASH = auto()
+    IF = auto()
+    ELSE = auto()
+    WHILE = auto()
+    RETURN = auto()
+    NOT = auto()
+    DEF = auto()
+    MAKE_FUNCTION = auto()
+    GET_ITER = auto()
+    POP_JUMP_IF_FALSE = auto()
+    COMMA = auto()  # Added missing COMMA token
 
-# Define keywords and their corresponding token types
-KEYWORDS = {
-    'if': 'IF',
-    'else': 'ELSE',
-    'for': 'FOR',
-    'while': 'WHILE',
-    'def': 'DEF',
-    'class': 'CLASS',
-    'return': 'RETURN',
-    'main': 'MAIN',
-}
+@dataclass
+class Token:
+    type: TokenType
+    value: Any
 
-# Islamic-themed symbols and phrases with their corresponding token types
-ISLAMIC_SYMBOLS = {
-    '﷽': 'BISMILLAH',
-    '☪': 'DECORATOR',
-    '☭': 'SYNCHRONIZE',
-    '۩': 'BLOCK_END',
-    'لَا إِلَٰهَ إِلَّا ٱللَّٰهُ': 'TRUE',
-    '♡': 'LIKE',
-    '۝': 'END_STATEMENT',
-    'ٱلسَّلَامُ عَلَيْكُمْ': 'HELLO_WORLD',
-    '🕌': 'MODULE',
-    '🕋': 'CORE',
-    '📿': 'ITERATE',
-    '🌙': 'IMPORT_MOON',
-}
-
-# Combine all special symbols into a single regex pattern
-SPECIAL_SYMBOLS_PATTERN = '|'.join(re.escape(sym) for sym in sorted(ISLAMIC_SYMBOLS.keys(), key=lambda x: -len(x)))
-
-# Compile all token regex patterns
-TOKEN_REGEX = [(typ, re.compile(pattern)) for typ, pattern in TOKENS]
-
-# Function to tokenize the input code
-def tokenize(code):
+def tokenize(code: str) -> List[Token]:
+    """Tokenizes input code into a list of tokens"""
+    keywords = {
+        'if': TokenType.IF,
+        'else': TokenType.ELSE,
+        'while': TokenType.WHILE,
+        'return': TokenType.RETURN,
+        'def': TokenType.DEF,
+    }
+    
     tokens = []
-    position = 0
-    line = 1
-    column = 1
-    while position < len(code):
-        match = None
-        # Check for special symbols and phrases first
-        special_match = re.match(SPECIAL_SYMBOLS_PATTERN, code[position:])
-        if special_match:
-            sym = special_match.group(0)
-            tokens.append((ISLAMIC_SYMBOLS[sym], sym))
-            consumed = len(sym)
-            position += consumed
-            column += consumed
+    i = 0
+    
+    while i < len(code):
+        char = code[i]
+        
+        if char.isspace():
+            i += 1
             continue
-
-        for token_type, regex in TOKEN_REGEX:
-            match = regex.match(code, position)
-            if match:
-                value = match.group(0)
-                if token_type == 'IDENTIFIER' and value in KEYWORDS:
-                    tokens.append((KEYWORDS[value], value))
-                elif token_type == 'OPERATOR':
-                    tokens.append((token_type, value))
-                elif token_type not in ['WHITESPACE', 'COMMENT']:
-                    tokens.append((token_type, value))
-                # Update position and column
-                consumed = len(value)
-                position += consumed
-                column += consumed
-                break
-        if not match and not special_match:
-            raise SyntaxError(f"Unexpected character: {code[position]} at line {line} column {column}")
-    tokens.append(('EOF', 'EOF'))
+        
+        if char.isdigit():
+            num = ""
+            while i < len(code) and (code[i].isdigit() or code[i] == '.'):
+                num += code[i]
+                i += 1
+            tokens.append(Token(TokenType.NUMBER, float(num)))
+            continue
+            
+        elif char == '"' or char == "'":
+            string = ""
+            quote = char
+            i += 1
+            while i < len(code) and code[i] != quote:
+                string += code[i]
+                i += 1
+            i += 1  # Skip closing quote
+            tokens.append(Token(TokenType.STRING, string))
+            continue
+            
+        elif char.isalpha():
+            ident = ""
+            while i < len(code) and (code[i].isalnum() or code[i] == "_"):
+                ident += code[i]
+                i += 1
+            # Check if it's a keyword
+            token_type = keywords.get(ident, TokenType.IDENTIFIER)
+            tokens.append(Token(token_type, ident))
+            continue
+            
+        elif char == "﷽":
+            tokens.append(Token(TokenType.ENTRY_POINT, char))
+        elif char == "۝":
+            tokens.append(Token(TokenType.ASSIGN, char))
+        elif char == "۩":
+            tokens.append(Token(TokenType.CONCAT, char))
+        elif char == ":":
+            tokens.append(Token(TokenType.COLON, char))
+        elif char == "(":
+            tokens.append(Token(TokenType.LEFT_PAREN, char))
+        elif char == ")":
+            tokens.append(Token(TokenType.RIGHT_PAREN, char))
+        elif char == "+":
+            tokens.append(Token(TokenType.PLUS, char))
+        elif char == "-":
+            tokens.append(Token(TokenType.MINUS, char))
+        elif char == "*":
+            tokens.append(Token(TokenType.STAR, char))
+        elif char == "/":
+            tokens.append(Token(TokenType.SLASH, char))
+        elif char == ",":
+            tokens.append(Token(TokenType.COMMA, char))
+            
+        i += 1
+        
     return tokens

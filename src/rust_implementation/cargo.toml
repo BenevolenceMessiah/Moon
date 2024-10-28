@@ -1,0 +1,9 @@
+[package]
+name = "moon_rust"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+libc = "0.2"
+chrono = "0.4"
+regex = "1.5"
