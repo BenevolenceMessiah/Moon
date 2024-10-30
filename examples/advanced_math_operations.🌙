@@ -1,0 +1,34 @@
+# advanced_math_operations.🌙
+
+﷽:
+    from math import sin, cos, tan, pi, sqrt
+
+    def calculate_trigonometric_values(angle_degrees: float):
+        angle_radians = angle_degrees * (pi / 180)  # Convert degrees to radians
+        return {
+            "sin": round(sin(angle_radians), 2),
+            "cos": round(cos(angle_radians), 2),
+            "tan": round(tan(angle_radians), 2)
+        }
+
+    def calculate_area_of_circle(radius: float) -> float:
+        return pi * radius * radius
+
+    def calculate_area_of_triangle(base: float, height: float) -> float:
+        return 0.5 * base * height
+
+    def main():
+        angle = 45
+        trig_values = calculate_trigonometric_values(angle)
+        print(f"Trigonometric values for {angle} degrees: {trig_values}")
+
+        radius = 5
+        area_circle = calculate_area_of_circle(radius)
+        print(f"Area of circle with radius {radius}: {area_circle}")
+
+        base = 10
+        height = 5
+        area_triangle = calculate_area_of_triangle(base, height)
+        print(f"Area of triangle with base {base} and height {height}: {area_triangle}")
+
+    main()

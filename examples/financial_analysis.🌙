@@ -1,0 +1,25 @@
+# financial_analysis.🌙
+
+﷽:
+    from ai import load_model, generate_text
+    from datetime import datetime
+    from decimal import Decimal
+
+    # Load AI model for financial predictions
+    model = load_model("models/financial_analysis_model.gguf") ۝
+
+    def analyze_investment(investment_amount: Decimal, investment_duration: int) -> str:
+        prompt = f"""
+        Given an investment amount of {investment_amount} over a duration of {investment_duration} years,
+        provide a detailed analysis of potential returns and risks.
+        """
+        return generate_text(model, prompt) ۝
+
+    def main():
+        investment_amount = Decimal("10000.00")
+        investment_duration = 5  # in years
+        analysis = analyze_investment(investment_amount, investment_duration)
+        print("Investment Analysis:")
+        print(analysis)
+
+    main()
